@@ -25,10 +25,11 @@
                                 <span>全部</span>
                             </a>
                         </li>
-                        <li class="list-active">
+                        <li @click="select('id')" class="list-active">
                             <a href="#">
-                                <span>销量</span>
-                                <img src="../../assets/images/up-red.png"/>
+                                <span>新品</span>
+                                <img v-if="search.order == 'desc'" src="../../assets/images/up-red.png"/>
+                                <img  v-else src="../../assets/images/down-red.png"/>
                             </a>
                         </li>
                         <li>
@@ -58,11 +59,9 @@
                     </li>
                    
                 </ul>
-                <ul>
-                    <li>
-                        <wv-loadmore></wv-loadmore>
-                    </li>
-                </ul>
+          
+                <wv-loadmore id="stopLoad" v-if="islastpage" type="lineDot" text="loading"></wv-loadmore>
+                 <wv-loadmore v-else></wv-loadmore>
             </section>
         </div>
 	
@@ -82,31 +81,49 @@ export default {
                 "order":"asc"
             },
             goods:[],
-            isload:false  // 滚动加载 true：禁止调用  false：调用
+            isload:false , // 是否禁止滚动加载 true：禁止调用  false：调用
+            islastpage:false,  //判断是否到底
         }
     },
     created(){
         this.dosearch()
     },
     methods:{
+        select(id){
+            // 排序方式
+            this.search.order  = this.search.order == 'desc' ? 'asc' : 'desc';
+            // 重新加载数据
+             this.dosearch();
+        },
         // 当距离底部50距离的时候调用
         loadMore(){
             //先禁用滚动加载 否则会不停的加载
-            this.isload = ture;
-
+            this.isload = true;
             this.search.page++;  //把当前页码加1
             //重新加载数据
             this.axios.get('/search',{params:this.search})
             .then(res=>{
+                
                 //把加载出来的数据合并到以前的数据中
-               this.goods = this.goods.concat(res.data.data.data);
-                // 设置为允许继续加载
-                this.isload = false;
+                this.goods = this.goods.concat(res.data.data.data);
+
+                // 判断是否最后一页
+                if(res.data.data.last_page > this.search.page){
+                   // 设置为允许继续加载
+                    this.isload = false;
+                }else{
+                    // 到最后一页是切换图标
+                    this.islastpage = true
+                }
              })
         },
         dosearch(){
             // 不为空时传递参数
              if(this.$route.query.keywords!=''){
+                //  重新激活自动加载(搜索条件初始化)
+                this.isload = false
+                this.islastpage = false
+                this.search.page = 1
 
                 this.axios.get('/search',{params:this.search})
                 .then(res=>{
@@ -119,3 +136,9 @@ export default {
     }
 }
 </script>
+
+<style>
+#stopLoad .weui-loadmore__tips{
+  background-color: #efefef !important;
+}
+</style>
