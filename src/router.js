@@ -44,7 +44,8 @@ export default new Router({
           path:'/Index/self',
           name:'self',
           meta:{
-            title:'个人中心'
+            title:'个人中心',
+            needlogin:true,
           },
           component: () => import('./views/Index/self.vue')
         },
