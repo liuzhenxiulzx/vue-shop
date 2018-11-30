@@ -51,7 +51,7 @@
                 >
 
                     <li class="pic" v-for="(v , k ) in goods" :key="k">
-                        <router-link to="/goods/details">
+                        <router-link :to="'/goods/details?id='+v.id" >
                             <img :src="v.logo"/>
                             <p>{{v.goods_name}}</p>
                             <b>￥{{v.skus[0].price}}</b>

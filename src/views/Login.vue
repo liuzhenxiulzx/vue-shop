@@ -12,12 +12,12 @@
                     <li>
                         <img src="../assets/images/login.png"/>
                         <label>账号</label>
-                        <input type="text" placeholder="请输入账号" v-model="username"/>
+                        <input type="text" placeholder="请输入账号" v-model="logfrom.username"/>
                     </li>
                     <li>
                         <img src="../assets/images/password.png"/>
                         <label>密码</label>
-                        <input type="password" placeholder="请输入密码" v-model="password"/>
+                        <input type="password" placeholder="请输入密码" v-model="logfrom.password"/>
                     </li>
                 </ul>
                 <input type="buttom" id="btn" @click="login" value="登录"/>
@@ -27,23 +27,45 @@
 </template>
 
 <script>
+import { Toast,Dialog  } from 'we-vue'
 export default {
     data(){
         return {
-            username:'',
-            password:''
+            logfrom:{
+                username:'',
+                password:''
+            }
+           
         }
     },
     methods:{
         login(){
-            if(this.username == 'tom' && this.password == 123){
-                // 设置token
-                localStorage.setItem('token','asldfjsodfjojehrentfeourf9we4r43');
-                // 跳转到首页
-                this.$router.push('/');
-            }else{
-                alert('用户或密码错误');
-            }
+            this.axios.post('/authorizations',this.logfrom)
+                .then(res=>{
+                    if(res.data.status_code == 200)
+                    {
+                          // 设置token
+                          localStorage.setItem('token','asldfjsodfjojehrentfeourf9we4r43');
+                          Toast.success('登录成功')
+                          this.$router.push('/');
+                    }
+                    else if(res.data.status_code == 403)
+                    {
+                        Toast.fail({
+                          duration: 1000,
+                          message: '账号不存在'
+                        })
+                    }
+                    else
+                    {
+
+                         Toast.fail({
+                          duration: 1000,
+                          message: '密码错误'
+                        })
+
+                    }
+                });
         }
     }
 }

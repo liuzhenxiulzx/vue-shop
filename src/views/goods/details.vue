@@ -12,60 +12,48 @@
 
     <div class="contaniner fixed-contb">
       <section class="detail">
-        <figure class="swiper-container">
-          <ul class="swiper-wrapper">
-            <li class="swiper-slide">
-              <a href="#">
-                <img src="../../assets/images/detail-ban02.png">
-              </a>
-            </li>
-            <li class="swiper-slide">
-              <a href="#">
-                <img src="../../assets/images/detail-ban01.png">
-              </a>
-            </li>
-            <li class="swiper-slide">
-              <a href="#">
-                <img src="../../assets/images/detail-ban03.png">
-              </a>
-            </li>
-            <li class="swiper-slide">
-              <a href="#">
-                <img src="../../assets/images/detail-ban04.png">
-              </a>
-            </li>
-          </ul>
-          <div class="swiper-pagination"></div>
-        </figure>
+        <wv-swipe :height="330" :autoplay="4000">
+          <wv-swipe-item v-for="(v,k) in goods.image" :key="k">
+            <img :src="v.path">
+          </wv-swipe-item>
+        </wv-swipe>
         <dl class="jiage">
           <dt>
-            <h3>2015冬季新款韩版加厚中长款小鹿毛呢大衣女系带加厚羊毛呢外套</h3>
+            <h3>{{goods.goods_name}}</h3>
             <div class="collect">
               <img src="../../assets/images/detail-heart-hei.png">
               <p>收藏</p>
             </div>
           </dt>
           <dd>
-            <b>￥28.99</b>
-            <del>￥139</del>
-            <input type="button" value="￥10.00" readonly>
+            <b v-if="goods.skus">￥{{ goods.skus[selectsku].price }}</b>
+            &nbsp;&nbsp;
+            <p v-if="goods.skus">( 库存量：{{ goods.skus[selectsku].stock }})</p>
+            <!-- <input type="button" value="￥10.00" readonly> -->
             <small>+356积分</small>
           </dd>
         </dl>
 
         <div class="chose">
           <ul>
-            <h3>颜色</h3>
-            <li>黑色</li>
-            <li class="chose-active">粉色</li>
-            <li>灰色</li>
-            <li>红色</li>
+            <h3>规格：</h3>
+            <li
+              @click="selectsku=key"
+              :class="{'chose-active' : key == selectsku}"
+              v-for="(c,key) in goods.skus"
+              :key="key"
+            >{{c.sku_name}}</li>
           </ul>
           <ul>
-            <h3>尺寸</h3>
-            <li>L</li>
-            <li class="chose-active">XL</li>
-            <li>XXL</li>
+            <h3>购买数量：</h3>
+            <li id="number">
+              <wv-number-spinner
+                v-if="goods.skus"
+                :min="1"
+                :max="goods.skus[selectsku].stock"
+                v-model="buycount"
+              ></wv-number-spinner>
+            </li>
           </ul>
         </div>
 
@@ -244,7 +232,7 @@
 
     <footer class="detail-footer fixed-footer">
       <a href="#" class="go-car">
-        <input type="button" value="加入购物车">
+        <input type="button" @click="addcart" value="加入购物车">
       </a>
       <a href="buy.html" class="buy">立即购买</a>
     </footer>
@@ -254,6 +242,75 @@
 
 <script>
 export default {
-    
-}
+  data() {
+    return {
+      goods: {},
+      selectsku: 0, //选中的规格
+      buycount: 1 //购买的数量
+    };
+  },
+  created() {
+    this.axios.get("/search?id=" + this.$route.query.id).then(res => {
+      this.goods = res.data.data;
+      // console.log(res.data.data);
+    });
+  },
+  methods: {
+    addcart() {
+      /*
+          将数据保存到浏览器
+          格式:
+          {
+            skuid:1,
+            buycount:2
+            checked:true  是否选中
+          }
+          */
+
+      // 获取浏览器中的购物车信息
+      let cart = localStorage.getItem("cart");
+      // 判断是否存在购物车信息 有则把购物车转成字符串
+      cart = cart ? JSON.parse(cart) : [];
+
+      //获取选中的规格id
+      let seletskuid = this.goods.skus[this.selectsku].id;
+
+      //  判断购物车中是否有同一件商品（根据sku_id查找）
+      let identicalgoods = cart.find(v => v.sku_id == seletskuid);
+      // console.log(identicalgoods);
+      if(identicalgoods)
+      {
+        // 相同规格商品累加
+        identicalgoods.buycount += this.buycount
+        // // 判断库存量
+        if(this.goods.skus[this.selectsku].stock < identicalgoods.buycount)
+
+            identicalgoods.buycount = this.goods.skus[this.selectsku].stock
+        
+      }
+      else
+      {
+        // 保存数据到购物车
+        cart.push({
+          sku_id: seletskuid,
+          buycount: this.buycount,
+          checked: true
+        });
+      }
+
+      // 把数组写回浏览器
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // 跳转至购物车页面
+      this.$router.push('/Index/cart')
+    }
+  }
+};
 </script>
+
+<style>
+#number {
+  border: none;
+  width: 35%;
+}
+</style>
