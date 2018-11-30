@@ -161,6 +161,14 @@ export default new Router({
           },
           component: () => import('./views/goods/details.vue')
         },
+        {
+          path:'/Settlement',
+          name:'Settlement',
+          mate:{
+            title:'结算页'
+          },
+          component: () => import('./views/goods/Settlement.vue')
+        },
       ]
     },
     
