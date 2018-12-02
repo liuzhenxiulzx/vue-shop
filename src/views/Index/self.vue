@@ -114,7 +114,7 @@ export default {
 	methods:{
 		// 退出登录
 		logout(){
-			localStorage.removeItem('token');
+			localStorage.removeItem('ACCESS_TOKEN');
 			this.$router.push('/login');
 		}
 	}

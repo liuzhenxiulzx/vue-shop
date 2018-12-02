@@ -19,7 +19,7 @@ Vue.use(NumberSpinner)
 router.beforeEach((to, from, next) => {
   if(to.meta.needlogin)
   {
-    let token = localStorage.getItem('token');
+    let token = localStorage.getItem('ACCESS_TOKEN');
     if(token)
     {
       next();
@@ -34,6 +34,20 @@ router.beforeEach((to, from, next) => {
       next();
   }
 })
+
+//  设置拦截器
+Vue.axios.interceptors.request.use(function(config){
+    // 在发送请求之前执行
+    let token = localStorage.getItem('ACCESS_TOKEN');
+    // console.log(token)
+    if(token){
+      config.headers['Authorization'] = "Bearer "+token
+    }
+    return config;
+},function(error){
+    // 失败返回的数据
+    return  Promise.reject(error);
+});
 
 // 先统一设置接口的基础地址
 Vue.axios.defaults.baseURL = 'http://127.0.0.1:8000/api'

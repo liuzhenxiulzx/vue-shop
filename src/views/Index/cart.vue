@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       goods: [], //服务器返回的商品信息
-	  cart: undefined, //浏览器中购物车信息
+	    cart: undefined, //浏览器中购物车信息
     };
   },
   created() {
@@ -66,7 +66,6 @@ export default {
       this.axios.get('/search?sku_ids='+skuids)
       	.then(res=>{
 			  this.goods = res.data.data
-			//   console.log(res.data.data);
 		  });
 
     } else {

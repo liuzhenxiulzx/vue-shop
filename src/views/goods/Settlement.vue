@@ -2,7 +2,7 @@
   <div>
     <header class="top-header fixed-header">
       <a class="icona" href="javascript:history.go(-1)">
-        <img src="images/left.png">
+        <img src="../../assets/images/left.png">
       </a>
       <h3>去结算</h3>
       <a class="iconb" href="shopcar.html"></a>
@@ -11,44 +11,46 @@
     <div class="contaniner fixed-cont">
       <section class="to-buy">
         <header>
-          <div class="now">
+          <div class="now" v-if="defultaddress">
             <span>
-              <img src="images/map-icon.png">
+              <img src="../../assets/images/map-icon.png">
             </span>
             <dl>
               <dt>
-                <b>弱小喵</b>
-                <strong>17756084251</strong>
+                <b>{{defultaddress.username}}</b>
+                <strong>{{defultaddress.tel}}</strong>
               </dt>
-              <dd>安徽省合肥市高新区科学大道天波路浙商大厦a座806安徽省合肥市</dd>
+              <dd>{{defultaddress.province+""+defultaddress.city+""+defultaddress.area+""+defultaddress.address}}</dd>
               <p>其他地址</p>
             </dl>
           </div>
 
-          <div class="to-now">
+          <div class="to-now"  v-for="(v,k) in address" :key="k">
             <div class="tonow">
-              <label for="tonow" onselectstart="return false"></label>
+              <label @click="seletaddresid=v.id" :class="{'ton':seletaddresid==v.id}" for="tonow" onselectstart="return false"></label>
               <input type="checkbox" id="tonow">
             </div>
             <dl>
               <dt>
-                <b>弱小喵</b>
-                <strong>17756084251</strong>
+                <b>{{v.username}}</b>
+                <strong>{{v.tel}}</strong>
               </dt>
-              <dd>安徽省合肥市高新区科学大道天波路浙商大厦a座806安徽省合肥市</dd>
+              <dd>{{v.province+""+v.city+""+v.area+""+v.address}}</dd>
             </dl>
             <h3>
               <a href="go-address.html">
-                <img src="images/write.png">
+                <img src="../../assets/images/write.png">
               </a>
             </h3>
           </div>
+
+
         </header>
         <div class="buy-list">
           <ul>
             <a href="detail.html">
               <figure>
-                <img src="images/detail-pp01.png">
+                <img src="../../assets/images/detail-pp01.png">
               </figure>
               <li>
                 <h3>超级大品牌服装，现在够买只要998</h3>
@@ -89,3 +91,37 @@
     </footer>
   </div>
 </template>
+
+<script>
+export default {
+  data(){
+      return {
+        address:[],
+        seletaddresid:"", //选中的地址
+        defultaddress:{}  //默认地址
+      }
+  },
+  created(){
+      this.axios.get('/addresses')
+        .then((res)=>{
+            if(res.data.status_code == 403)
+            {
+              this.$router.push('/login')
+            }
+            else
+            {
+
+              this.address = res.data.data;
+              let defaulta = res.data.data.find(v=>v.is_default == 1);
+              if(!defaulta){
+                this.defultaddress = res.data.data[0];
+              }
+              else
+              {
+                 this.defultaddress = defaulta;
+              }
+            }
+        });
+  }
+}
+</script>

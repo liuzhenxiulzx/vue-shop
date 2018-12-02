@@ -45,7 +45,7 @@ export default {
                     if(res.data.status_code == 200)
                     {
                           // 设置token
-                          localStorage.setItem('token','asldfjsodfjojehrentfeourf9we4r43');
+                          localStorage.setItem('ACCESS_TOKEN',res.data.data.ACCESS_TOKEN);
                           Toast.success('登录成功')
                           this.$router.push('/');
                     }
